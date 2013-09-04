@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Affiliates Custom Method - Products amount
  * Description: Custom method: general rate by products amount.
- * Version: 1.0
+ * Version: 1.1
  * Author: eggemplo
  * Author URI: http://www.itthinx.com
  */
@@ -42,7 +42,7 @@ class ACM {
 					$product_id = $product->id;
 					$product_rate = get_post_meta( $product_id, '_affiliates_rate', true );
 					if ( strlen( (string) $product_rate ) == 0 ) {
-						$return = bcadd( $return, bcmul( $default_rate, $base_amount, 2 ), AFFILIATES_REFERRAL_AMOUNT_DECIMALS );
+						$return = bcadd( $return, bcmul( $default_rate, $order->get_item_total($item), 2 ), AFFILIATES_REFERRAL_AMOUNT_DECIMALS );
 					}
 					if ( strlen( (string) $product_rate ) > 0 ) {
 						$return = bcadd( $return, $product_rate, AFFILIATES_REFERRAL_AMOUNT_DECIMALS );
