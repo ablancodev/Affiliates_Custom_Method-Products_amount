@@ -49,8 +49,8 @@ class ACM {
     				    } else {
     				        $product_id = $product->id;
     				    }
-    					
-    					$product_rate = get_post_meta( $product_id, '_affiliates_rate', true );
+    				    
+    				    $product_rate = get_post_meta( $product_id, '_affiliates_rate', true );
     					if ( strlen( (string) $product_rate ) == 0 ) {
     						$return = bcadd( $return, bcmul( $default_rate, $order->get_line_total( $item ), 2 ), AFFILIATES_REFERRAL_AMOUNT_DECIMALS );
     					}
