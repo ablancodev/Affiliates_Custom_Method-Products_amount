@@ -27,27 +27,38 @@ class ACM {
 	}
 	public static function calculate( $order_id, $base_amount ) {
 		$return = '0';
-		if ( class_exists( 'WC_Order' ) ) {
-			$order = new WC_Order();
+		
+		if ( function_exists( 'wc_get_order' ) ) {
+		    $order = wc_get_order( $order_id );
+		} else if ( class_exists( 'WC_Order' ) ) {
+		    $order = new WC_Order($order_id);
 		} else {
-			$order = new woocommerce_order();
-		}
-		if ( $order->get_order( $order_id ) ) {
+		    $order = new woocommerce_order();		   
+		}		
+		
+		if ( is_object( $order ) ) {
 			$items = $order->get_items();
 			$options = get_option( 'affiliates_woocommerce' , array() );
 			$default_rate = $options['default_rate'];
-			foreach( $items as $item ) {
-				$product = $order->get_product_from_item( $item );
-				if ( $product->exists() ) {
-					$product_id = $product->id;
-					$product_rate = get_post_meta( $product_id, '_affiliates_rate', true );
-					if ( strlen( (string) $product_rate ) == 0 ) {
-						$return = bcadd( $return, bcmul( $default_rate, $order->get_line_total($item), 2 ), AFFILIATES_REFERRAL_AMOUNT_DECIMALS );
-					}
-					if ( strlen( (string) $product_rate ) > 0 ) {
-						$return = bcadd( $return, bcmul( $product_rate, $item['qty'], AFFILIATES_REFERRAL_AMOUNT_DECIMALS ), AFFILIATES_REFERRAL_AMOUNT_DECIMALS );
-					}
-				}
+			if ( sizeof( $items ) > 0 ) {
+			    foreach( $items as $item ) {
+			        $product = $item->get_product();
+			        if ( $product->exists() ) {
+			            if ( method_exists( $product, 'get_id' ) ) {
+			                $product_id = $product->get_id();
+			            } else {
+			                $product_id = $product->id;
+			            }
+			            
+			            $product_rate = get_post_meta( $product_id, '_affiliates_rate', true );
+			            if ( strlen( (string) $product_rate ) == 0 ) {
+			                $return = bcadd( $return, bcmul( $default_rate, $order->get_line_total( $item ), 2 ), AFFILIATES_REFERRAL_AMOUNT_DECIMALS );
+			            }
+			            if ( strlen( (string) $product_rate ) > 0 ) {
+			                $return = bcadd( $return, bcmul( $product_rate, $item->get_quantity(), AFFILIATES_REFERRAL_AMOUNT_DECIMALS ), AFFILIATES_REFERRAL_AMOUNT_DECIMALS );
+			            }
+			        }
+			    }
 			}
 		}
 		return $return;
