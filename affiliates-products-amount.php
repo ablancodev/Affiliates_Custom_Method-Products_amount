@@ -27,18 +27,13 @@ class ACM {
 	}
 	public static function calculate( $order_id, $base_amount ) {
 		$return = '0';
-		
-		$order = null;
-		if ( class_exists( 'WC_Order' ) ) {
-			$order = new WC_Order( $order_id );
-		} else {
-			$order = new woocommerce_order();
-		}
-		
-		if ( is_object( $order ) ) {
+
+		$order = self::get_order( $order_id );
+
+		if ( $order ) {
 			$items = $order->get_items();
 			$options = get_option( 'affiliates_woocommerce' , array() );
-			$default_rate = $options['default_rate'];
+			$default_rate = isset( $options['default_rate'] ) ? $options['default_rate'] : 0;
 			if ( sizeof( $items ) > 0 ) {
 			    foreach( $items as $item ) {
 			        $product = $item->get_product();
@@ -61,6 +56,28 @@ class ACM {
 			}
 		}
 		return $return;
+	}
+
+	public static function get_order( $order_id = '' ) {
+		$result = null;
+		if ( function_exists( 'wc_get_order' ) ) {
+			if ( $order = wc_get_order( $order_id ) ) {
+				$result = $order;
+			}
+		} else if ( class_exists( 'WC_Order' ) ) {
+			$order = new WC_Order( $order_id );
+			if ( $order->get_order( $order_id ) ) {
+				$result = $order;
+			}
+		} else {
+			$order = new woocommerce_order();
+			if ( method_exists( $order, 'get_order' ) ) {
+				if ( $order->get_order( $order_id ) ) {
+					$result = $order;
+				}
+			}
+		}
+		return $result;
 	}
 }
 add_action( 'init', array( 'ACM', 'init' ) );
