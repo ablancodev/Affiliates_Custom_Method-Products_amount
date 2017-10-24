@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Affiliates Custom Method - Products amount
  * Description: Custom method: general rate by products amount.
- * Version: 1.1.1
+ * Version: 1.2.0
  * Author: eggemplo
  * Author URI: http://www.itthinx.com
  */
@@ -28,13 +28,12 @@ class ACM {
 	public static function calculate( $order_id, $base_amount ) {
 		$return = '0';
 		
-		if ( function_exists( 'wc_get_order' ) ) {
-		    $order = wc_get_order( $order_id );
-		} else if ( class_exists( 'WC_Order' ) ) {
-		    $order = new WC_Order($order_id);
+		$order = null;
+		if ( class_exists( 'WC_Order' ) ) {
+			$order = new WC_Order( $order_id );
 		} else {
-		    $order = new woocommerce_order();		   
-		}		
+			$order = new woocommerce_order();
+		}
 		
 		if ( is_object( $order ) ) {
 			$items = $order->get_items();
